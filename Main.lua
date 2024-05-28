@@ -1,10 +1,9 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Farls-Xavier/UiLibrary/main/Library.lua"))()
 
-local Ignore = {
-    Flushable = {},
-    Target = nil,
-    CanPass = false
-}
+local HttpService = game:GetService("HttpService")
+local CanRunRestOfScript = true
+
+local FlushableTable = {}
 
 if not isfolder("@FarlsXavier") then
     error("Root folder '@FarlsXavier' does not exist.")
@@ -36,6 +35,23 @@ else
     end
 end
 
+local JSONDecode = HttpService:JSONDecode(readfile("@FarlsXavier\\Arsenal\\Config.ini"))
+
+local Window = Library:Window({
+    Title = JSONDecode.Name.. " - 286090429" or "Arsenal - 286090429",
+    OnClose = function()
+        for i,v in pairs(FlushableTable) do
+            pcall(function()
+                v:Remove()
+                CanRunRestOfScript = false
+            end)
+        end
+        Library:destroy()
+    end
+})
+
+local Target = nil
+
 local Player = game.Players.LocalPlayer
 local Char = Player.Character or Player.CharacterAdded:Wait()
 local Mouse = Player:GetMouse()
@@ -43,58 +59,44 @@ local Mouse = Player:GetMouse()
 local Camera = workspace.CurrentCamera
 
 local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
-local ConfigDecode = HttpService:JSONDecode(readfile("@FarlsXavier\\Arsenal\\Config.ini"))
-
-local Holding = false
-
-local Window = Library:Window({
-    Title = ConfigDecode.Name or "Arsenal - 286090429",
-    OnClose = function()
-        for i,v in pairs(Ignore.Flushable) do
-            pcall(function()
-                v:Remove()
-                Ignore.CanPass = false
-            end)
-        end
-        Library:destroy()
-    end
-})
-
+--[[ ESP SETTINGS ]]--
 local EspSettings = {
     TeamCheck = false
 }
 
 local TracerSettings = {
     Visible = false,
-    Color = Color3.fromRGB(79, 47, 94),
+    Color = Color3.fromRGB(126, 161, 255),
     Position = "Bottom"
 }
 
 local BoxSettings = {
     Visible = false,
-    Color = Color3.fromRGB(79, 47, 94)
+    Color = Color3.fromRGB(126, 161, 255)
 }
 
 local NameSettings = {
     Visible = false,
-    Color = Color3.fromRGB(79, 47, 94)
+    Color = Color3.fromRGB(126, 161, 255)
 }
+
+--[[ AIMBOT SETTINGS ]] --
+local Holding = false
 
 local AimbotSettings = {
     Enabled = false,
     WallCheck = false,
     TeamCheck = false,
-    Aimpart = "Head", -- Torso, Head
+    Aimpart = "Head", -- Torso, Closest, Head
     Smoothness = 0
 }
 
 local FovSettings = {
     Visible = false,
     Enabled = false,
-    Color = Color3.fromRGB(79, 47, 94),
+    Color = Color3.fromRGB(126, 161, 255),
     Size = 90
 }
 
@@ -104,8 +106,8 @@ local Tabs = {
         Icon = "rbxassetid://14966164502"
     }),
 
-    ["ESP"] = Window:Tab({
-        Text = "ESP",
+    ["Visuals"] = Window:Tab({
+        Text = "Visuals",
         Icon = "rbxassetid://14966779139"
     }),
 
@@ -114,9 +116,8 @@ local Tabs = {
         Icon = "rbxassetid://14958157475"
     }),
 
-    ["Skin Changer"] = Window:Tab({
-        Text = "Skin Changer",
-        Icon = "rbxassetid://14936481814"
+    ["SkinChangerTab"] = Window:Tab({
+        Text = "Skin Changer"
     })
 }
 
@@ -158,7 +159,7 @@ local AimTab = {
     }),
 
     ["Fov enabled Toggle"] = Tabs.Aim:Toggle({
-        Text = "FOV",
+        Text = "FOV Enabled",
         Callback = function(v)
             FovSettings.Enabled = v
         end
@@ -180,6 +181,40 @@ local AimTab = {
             FovSettings.Size = v
         end
     }),
+}
+
+local VisualsTab = {
+    ["Boxes Toggle"] = Tabs.Visuals:Toggle({
+        Text = "Boxes",
+        Callback = function(v)
+            BoxSettings.Visible = v
+        end
+    }),
+
+    ["Names Toggle"] = Tabs.Visuals:Toggle({
+        Text = "Names",
+        Callback = function(v)
+            NameSettings.Visible = v
+        end
+    }),
+
+    ["Tracers Toggle"] = Tabs.Visuals:Toggle({
+        Text = "Tracers",
+        Callback = function(v)
+            TracerSettings.Visible = v
+        end
+    }),
+
+    ["SEPERATOR"] = Tabs.Visuals:Label({
+        Text = "--------------------------------------------"
+    }),
+
+    ["TeamCheck Toggle"] = Tabs.Visuals:Toggle({
+        Text = "Team Check",
+        Callback = function(v)
+            EspSettings.TeamCheck = v
+        end
+    })
 }
 
 local PlayerTab = {
@@ -208,13 +243,25 @@ local PlayerTab = {
 }
 
 local SkinChangerTab = {
-    ["SoonLabel"] = Tabs["Skin Changer"]:Label({
-        Text = "Will do when dropboxes(2032)",
+    ["SoonLabel"] = Tabs.SkinChangerTab:Label({
+        Text = "In the year 2032",
         Weight = Enum.FontWeight.Heavy
     })
 }
 
-local fov = Drawing.new("Circle") fov.Transparency = 1 fov.Filled = false fov.Color = FovSettings.Color
+function NotObstructing(Destination, Ignore)
+    local Origin = Camera.CFrame.Position
+    local CheckRay = Ray.new(Origin, Destination - Origin)
+    local Hit = workspace:FindPartOnRayWithIgnoreList(CheckRay, Ignore)
+    return Hit == nil
+end
+
+local fov = Drawing.new("Circle")
+fov.Transparency = 1
+fov.Filled = false
+fov.Color = FovSettings.Color
+
+table.insert(FlushableTable, fov)
 
 local function GetClosestPlayer()
     local MaxDistance
@@ -294,8 +341,6 @@ fov.Visible = false
 coroutine.wrap(function()
     local CurrentStep
 
-    Flush(CurrentStep)
-
     CurrentStep = RunService.RenderStepped:Connect(function()
         fov.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         if FovSettings.Enabled == true then
@@ -305,14 +350,14 @@ coroutine.wrap(function()
             fov.Visible = false
         end
         fov.Radius = FovSettings.Size
-        if Holding == true and AimbotSettings.Enabled == true and Ignore.CanPass == true then
+        if Holding == true and AimbotSettings.Enabled == true and CanRunRestOfScript == true then
             if AimbotSettings.Smoothness > 0 then
                 GetClosestPlayer()
 
                 local part1, part2 = Target.Character:FindFirstChild("HumanoidRootPart"), Player.Character:FindFirstChild("HumanoidRootPart")
                 local Distance = (part1.Position - part2.Position).Magnitude
 
-                if Target and Target.Character and Target.Character:FindFirstChild(AimbotSettings.Aimpart) ~= nil and not Target:FindFirstChild("Deaded") or Target:FindFirstChild("RecentlyDied") and not Distance > ConfigDecode.MaxDistance then
+                if Target and Target.Character and Target.Character:FindFirstChild(AimbotSettings.Aimpart) ~= nil and not Target:FindFirstChild("Deaded") or Target:FindFirstChild("RecentlyDied") and Distance < JSONDecode.MaxDistance and NotObstructing(Target.Character[AimbotSettings.Aimpart].Position, {Player.Character, Target.Character}) then
                     Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, Target.Character[AimbotSettings.Aimpart].Position), AimbotSettings.Smoothness)
                 end
             else
@@ -321,7 +366,7 @@ coroutine.wrap(function()
                 local part1, part2 = Target.Character:FindFirstChild("HumanoidRootPart"), Player.Character:FindFirstChild("HumanoidRootPart")
                 local Distance = (part1.Position - part2.Position).Magnitude
 
-                if Target ~= nil and Target.Character and Target.Character:FindFirstChild(AimbotSettings.Aimpart) ~= nil and not Target:FindFirstChild("Deaded") or Target:FindFirstChild("RecentlyDied") and not Distance > ConfigDecode.MaxDistance then
+                if Target ~= nil and Target.Character and Target.Character:FindFirstChild(AimbotSettings.Aimpart) ~= nil and not Target:FindFirstChild("Deaded") or Target:FindFirstChild("RecentlyDied") and Distance < JSONDecode.MaxDistance and NotObstructing(Target.Character[AimbotSettings.Aimpart].Position, {Player.Character, Target.Character}) then
                     Camera.CFrame = CFrame.new(Camera.CFrame.Position, Target.Character[AimbotSettings.Aimpart].Position) 
                 end
             end
@@ -338,8 +383,8 @@ local function AddBoxes(player)
     Box.Thickness = 2
     Box.Filled = false
 
-    Flush(Box)
-    Flush(CurrentStep)
+    table.insert(FlushableTable, Box)
+    table.insert(FlushableTable, CurrentStep)
 
     local HeadOffset = Vector3.new(0, 0.5, 0)
     local LegOffset = Vector3.new(0, 3, 0)
@@ -390,8 +435,8 @@ local function AddTracer(player)
     Tracer.Thickness = 1
     Tracer.Transparency = 1
 
-    Flush(Tracer)
-    Flush(CurrentStep)
+    table.insert(FlushableTable, Tracer)
+    table.insert(FlushableTable, CurrentStep)
 
     CurrentStep = RunService.RenderStepped:Connect(function()
         if player.Character ~= nil and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
@@ -445,8 +490,8 @@ local function AddName(player)
     Text.OutlineColor = Color3.fromRGB(0,0,0)
     Text.Text = player.DisplayName
 
-    Flush(Text)
-    Flush(CurrentStep)
+    table.insert(FlushableTable, Text)
+    table.insert(FlushableTable, CurrentStep)
 
     CurrentStep = RunService.RenderStepped:Connect(function()
         if player.Character ~= nil and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
@@ -494,14 +539,3 @@ game.Players.PlayerAdded:Connect(function(player)
     AddTracer(player)
     AddName(player)
 end)
-
-function NotObstructing(Destination, Ignore)
-    local Origin = Camera.CFrame.Position
-    local CheckRay = Ray.new(Origin, Destination - Origin)
-    local Hit = workspace:FindPartOnRayWithIgnoreList(CheckRay, Ignore)
-    return Hit == nil
-end
-
-function Flush(instance)
-    table.insert(Ignore.Flushable, instance)
-end
