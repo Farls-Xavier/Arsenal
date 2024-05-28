@@ -115,7 +115,7 @@ local Tabs = {
     }),
 
     ["Skin Changer"] = Window:Tab({
-        Text = "Config",
+        Text = "Skin Changer",
         Icon = "rbxassetid://14936481814"
     })
 }
@@ -180,6 +180,38 @@ local AimTab = {
             FovSettings.Size = v
         end
     }),
+}
+
+local PlayerTab = {
+    ["WalkSpeed Slider"] = Tabs.Player:Slider({
+        Text = "WalkSpeed",
+        Min = 0,
+        Max = 500,
+        Default = Char:WaitForChild("Humanoid", math.huge).WalkSpeed,
+        Callback = function(v)
+            Char:WaitForChild("Humanoid", math.huge).WalkSpeed = v
+        end
+    }),
+    
+    ["JumpPower Slider"] = Tabs.Player:Slider({
+        Text = "JumpPower",
+        Min = 0,
+        Max = 500,
+        Default = Char:WaitForChild("Humanoid", math.huge).JumpPower or Char:WaitForChild("Humanoid", math.huge).JumpHeight,
+        Callback = function(v)
+            Char:WaitForChild("Humanoid", math.huge).JumpPower = v
+            pcall(function()
+                Char:WaitForChild("Humanoid", math.huge).JumpHeight = v
+            end)
+        end
+    })
+}
+
+local SkinChangerTab = {
+    ["SoonLabel"] = Tabs["Skin Changer"]:Label({
+        Text = "Will do when dropboxes(2032)",
+        Weight = Enum.FontWeight.Heavy
+    })
 }
 
 local fov = Drawing.new("Circle") fov.Transparency = 1 fov.Filled = false fov.Color = FovSettings.Color
