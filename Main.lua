@@ -105,7 +105,7 @@ local Tabs = {
     }),
 
     ["ESP"] = Window:Tab({
-        Text = "Visuals",
+        Text = "ESP",
         Icon = "rbxassetid://14966779139"
     }),
 
