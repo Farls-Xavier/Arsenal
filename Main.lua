@@ -69,6 +69,18 @@ local Window = Library:Window({
     end
 })
 
+local function NotObstructing(Destination, Ignore)
+    local Origin = Camera.CFrame.Position
+    local CheckRay = Ray.new(Origin, Destination - Origin)
+    local Hit = workspace:FindPartOnRayWithIgnoreList(CheckRay, Ignore)
+
+    return Hit == nil
+end
+
+local function Flush(instance)
+    table.insert(Ignore.ToFlush, instance)
+end
+
 --I wont rework this stuff cause im too lazy :p
 local EspSettings = {
     TeamCheck = false
@@ -110,7 +122,7 @@ local FovSettings = {
 
 local Tabs = {
     ["Aim Tab"] = Window:Tab({Text = "Aim", Icon = "rbxassetid://14966164502"}),
-    ["ESP Tab"] = Window:Tab({Text = "ESP", Icon = "rbxassetid://14966779139"}),
+    ["Visuals Tab"] = Window:Tab({Text = "Visuals", Icon = "rbxassetid://14966779139"}),
     ["Player Tab"] = Window:Tab({Text = "Player", Icon = "rbxassetid://14958157475"}),
     ["SkinChanger Tab"] = Window:Tab({Text = "Skin Changer"}), -- No Icon tet too big
     ["Config Tab"] = Window:Tab({Text = "Config", Icon = "rbxassetid://13850085640"})
@@ -180,34 +192,49 @@ local Stuffs = {
         }),
     },
     
-    espTab = {
-        BoxesToggle = Tabs["ESP Tab"]:Toggle({
+    visualsTab = {
+        BoxesToggle = Tabs["Visuals Tab"]:Toggle({
             Text = "Boxes",
             Callback = function(v)
                 BoxSettings.Visible = v
             end
         }),
     
-        NamesToggle = Tabs["ESP Tab"]:Toggle({
+        NamesToggle = Tabs["Visuals Tab"]:Toggle({
             Text = "Names",
             Callback = function(v)
                 NameSettings.Visible = v
             end
         }),
     
-        TracersToggle = Tabs["ESP Tab"]:Toggle({
+        TracersToggle = Tabs["Visuals Tab"]:Toggle({
             Text = "Tracers",
             Callback = function(v)
                 TracerSettings.Visible = v
             end
         }),
     
-        Seperator2 = Tabs["ESP Tab"]:Label({Text = "Settings: "}),
+        Seperator2 = Tabs["Visuals Tab"]:Label({Text = "Settings: "}),
     
-        TeamcheckToggle2 = Tabs["ESP Tab"]:Toggle({
+        TeamcheckToggle2 = Tabs["Visuals Tab"]:Toggle({
             Text = "Team check",
             Callback = function(v)
                 EspSettings.TeamCheck = v
+            end
+        }),
+
+        Seperator3 = Tabs["Visuals Tab"]:Label({Text = "Viewmodel Stuff: "}),
+
+        RainbowGunToggle = Tabs["Visuals Tab"]:Toggle({
+            Text = "Rainbow gun",
+            Callback = function(v)
+                for i,v in pairs(Camera:WaitForChild("Arms"):GetDescendants()) do
+                    if not v:IsA("Animation") then
+                        if v.Name ~= v.Name ~= "Offset" and v.Name ~= "HumanoidRootPart" and v.Name ~= "Joint" and v:IsA("BasePart") and v.Parent.Name ~= "CSSArms" then
+                            v.Transparency = 0.75
+                        end
+                    end               
+                end
             end
         })
     },
@@ -237,27 +264,30 @@ local Stuffs = {
             end
         })
     },
-    
-    skinchangerTab = {
-        
+
+    skinChangerTab = {
+        KnifeDropdown = Tabs["SkinChanger Tab"]:Dropdown({
+            Text = "Knife Skin"
+        })
     },
-    
+
     configTab = {
         
-    }
+    },
 }
 
-local function NotObstructing(Destination, Ignore)
-    local Origin = Camera.CFrame.Position
-    local CheckRay = Ray.new(Origin, Destination - Origin)
-    local Hit = workspace:FindPartOnRayWithIgnoreList(CheckRay, Ignore)
+Stuffs.skinChangerTab.KnifeDropdown:Add("Bat", "Bat")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Swordfish", "Swordfish")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Calculator", "Calculator")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Karambit", "Karambit")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Butterfly Knife", "Butterfly Knife")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Endbringer", "Endbringer")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Classic Sword", "Classic Sword")
+Stuffs.skinChangerTab.KnifeDropdown:Add("Chainsaw", "Chainsaw")
 
-    return Hit == nil
-end
-
-local function Flush(instance)
-    table.insert(Ignore.ToFlush, instance)
-end
+Stuffs.skinChangerTab.KnifeDropdown:SetCallback(function(v)
+    Player:WaitForChild("Data", 1000).Melee.Value = v
+end)
 
 local fov = Drawing.new("Circle")
 local function UpdateFov(...) -- Using ... for like IF you do decide to add settings and can stay nil(Dont have to put args) well It wont be used AT ALL
