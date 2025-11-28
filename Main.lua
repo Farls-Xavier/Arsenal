@@ -292,7 +292,7 @@ end)
 local fov = Drawing.new("Circle")
 local function UpdateFov(...) -- Using ... for like IF you do decide to add settings and can stay nil(Dont have to put args) well It wont be used AT ALL
     if (...) then
-        local args = ...
+        local args = {...}
         fov.Transparency = args.Transparency
         fov.Filled = args.Filled
         fov.Color = FovSettings.Color or args.Color
