@@ -382,7 +382,7 @@ coroutine.wrap(function()
                             local IsDead = Ignore.Target:FindFirstChild("Deaded") or Ignore.Target:FindFirstChild("DiedRecently")
 
                             if CP and TargetCharacter:FindFirstChild(AimbotSettings.Aimpart) and not IsDead and Distance < Config.MaxDistance then
-                                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position), AimbotSettings.Smoothness)
+                                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position), AimbotSettings.Smoothness * -1)
                             end
                         end
                     end
