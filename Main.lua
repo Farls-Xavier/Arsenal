@@ -367,44 +367,27 @@ coroutine.wrap(function()
         -- Okay ill try and make this readable if you are trying to look at it dw babe
 
         if Holding and AimbotSettings.Enabled and Ignore.CanContinue then
-            if AimbotSettings.Smoothness > 0 then
-                local CP = GetClosestPlayer() -- Sussy name :flushed:
+            local CP = GetClosestPlayer() -- Sussy name :flushed:
 
-                if CP then
-                    local TargetCharacter = CP.Character
-                    if TargetCharacter then
-                        local Part1, Part2 = TargetCharacter:FindFirstChild("HumanoidRootPart"), Char:FindFirstChild("HumanoidRootPart")
-                        if Part1 and Part2 then
-                            local Distance = (Part1.Position - Part2.Position).Magnitude
+            local alphathingvalue = math.clamp(AimbotSettings.Smoothness, 0.01, .99)
 
-                            local IsDead = Ignore.Target:FindFirstChild("Deaded") or Ignore.Target:FindFirstChild("DiedRecently")
+            if CP then
+                local TargetCharacter = CP.Character
+                if TargetCharacter then
+                    local Part1, Part2 = TargetCharacter:FindFirstChild("HumanoidRootPart"), Char:FindFirstChild("HumanoidRootPart")
+                    if Part1 and Part2 then
+                        local Distance = (Part1.Position - Part2.Position).Magnitude
 
-                            if CP and TargetCharacter:FindFirstChild(AimbotSettings.Aimpart) and not IsDead and Distance < Config.MaxDistance then
-                                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position), 1 - AimbotSettings.Smoothness)
-                            end
-                        end
-                    end
-                end
-            else
-                local CP = GetClosestPlayer() -- Sussy name :flushed:
+                        local IsDead = Ignore.Target:FindFirstChild("Deaded") or Ignore.Target:FindFirstChild("DiedRecently")
 
-                if CP then
-                    local TargetCharacter = CP.Character
-                    if TargetCharacter then
-                        local Part1, Part2 = TargetCharacter:FindFirstChild("HumanoidRootPart"), Char:FindFirstChild("HumanoidRootPart")
-                        if Part1 and Part2 then
-                            local Distance = (Part1.Position - Part2.Position).Magnitude
-
-                            local IsDead = Ignore.Target:FindFirstChild("Deaded") or Ignore.Target:FindFirstChild("DiedRecently")
-
-                            if Ignore.Target and TargetCharacter:FindFirstChild(AimbotSettings.Aimpart) and IsDead == false and Distance < Config.MaxDistance then
-                                Camera.CFrame = CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position) 
-                            end
+                        if CP and TargetCharacter:FindFirstChild(AimbotSettings.Aimpart) and not IsDead and Distance < Config.MaxDistance then
+                            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position), 1 - alphathingvalue)
                         end
                     end
                 end
             end
         end 
+
     end)
 
     Flush(CurrentStep)
