@@ -367,7 +367,7 @@ coroutine.wrap(function()
         -- Okay ill try and make this readable if you are trying to look at it dw babe
 
         if Holding and AimbotSettings.Enabled and Ignore.CanContinue then
-            if UsingSmoothness AimbotSettings.Smoothness > 0 then
+            if AimbotSettings.Smoothness > 0 then
                 local CP = GetClosestPlayer() -- Sussy name :flushed:
 
                 if CP then
