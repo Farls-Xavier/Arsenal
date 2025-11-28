@@ -366,10 +366,8 @@ coroutine.wrap(function()
 
         -- Okay ill try and make this readable if you are trying to look at it dw babe
 
-        local UsingSmoothness = AimbotSettings.Smoothness > 0
-
         if Holding and AimbotSettings.Enabled and Ignore.CanContinue then
-            if UsingSmoothness then
+            if UsingSmoothness AimbotSettings.Smoothness > 0 then
                 local CP = GetClosestPlayer() -- Sussy name :flushed:
 
                 if CP then
@@ -382,7 +380,7 @@ coroutine.wrap(function()
                             local IsDead = Ignore.Target:FindFirstChild("Deaded") or Ignore.Target:FindFirstChild("DiedRecently")
 
                             if CP and TargetCharacter:FindFirstChild(AimbotSettings.Aimpart) and not IsDead and Distance < Config.MaxDistance then
-                                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position), AimbotSettings.Smoothness * -1)
+                                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetCharacter[AimbotSettings.Aimpart].Position), 1 - AimbotSettings.Smoothness)
                             end
                         end
                     end
